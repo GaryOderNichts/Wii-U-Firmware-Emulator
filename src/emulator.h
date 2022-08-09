@@ -22,6 +22,8 @@ public:
 	void reset();
 	void quit();
 	
+	void loadCustomFwImg();
+
 	PhysicalMemory physmem;
 	
 	PPCReservation reservation;
@@ -37,4 +39,5 @@ private:
 	
 	bool running;
 	bool boot0;
+	bool fw_loaded;
 };

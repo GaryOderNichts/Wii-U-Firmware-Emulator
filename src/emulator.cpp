@@ -30,9 +30,26 @@ Emulator::Emulator(bool boot0) :
 		{this, &reservation, 2}
 	},
 	dsp(this),
-	boot0(boot0)
+	boot0(boot0),
+	fw_loaded(false)
 {
 	reset();
+}
+
+void Emulator::loadCustomFwImg()
+{
+	if (fw_loaded) {
+		return;
+	}
+
+	fw_loaded = true;
+
+	Sys::out->write("Triggered custom fw.img load\n");
+
+	Buffer buffer = FileUtils::load("custom/fw.img");
+
+	// 0x01000000 <- fw.img location in memory
+	physmem.write(0x01000000, buffer);
 }
 
 void Emulator::reset() {
@@ -40,6 +57,13 @@ void Emulator::reset() {
 	Buffer buffer = FileUtils::load(boot0 ? "files/boot0.bin" : "files/boot1.bin");
 	uint32_t load_address = boot0 ? 0xFFFF0000 : 0xD400200;
 	physmem.write(load_address, buffer);
+
+	if (!boot0) {
+		// make rsa_calc always succeed for image signature
+		physmem.write(0x0d400848, 0x20002000); // mov r0, #0; mov r0, #0;
+	}
+
+	fw_loaded = false;
 
 	arm.reset();
 	arm.core.regs[ARMCore::PC] = load_address;

@@ -59,6 +59,10 @@ void ARMProcessor::step() {
 	updateTimer();
 	checkDebugPoints();
 	
+	if (core.regs[ARMCore::PC] == 0x0d400780) {
+		emulator->loadCustomFwImg();
+	}
+
 	#if BREAKPOINTS
 	checkBreakpoints(core.regs[ARMCore::PC]);
 	#endif
